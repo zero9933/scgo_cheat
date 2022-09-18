@@ -1,5 +1,4 @@
 #include "includes.h"
-
 #ifdef _WIN64
 #define GWL_WNDPROC GWLP_WNDPROC
 #endif
@@ -10,6 +9,10 @@ EndScene oEndScene = NULL;
 WNDPROC oWndProc;
 static HWND window = NULL;
 
+#include "scgo.hpp"
+using namespace hazedumper::signatures;
+using namespace hazedumper::netvars;
+
 void InitImGui(LPDIRECT3DDEVICE9 pDevice)
 {
 	ImGui::CreateContext();
@@ -19,16 +22,15 @@ void InitImGui(LPDIRECT3DDEVICE9 pDevice)
 	ImGui_ImplDX9_Init(pDevice);
 }
 
-#include "scgo.hpp"
-using namespace hazedumper::signatures;
-using namespace hazedumper::netvars;
+bool init = false;
 
-bool int = false;
-
-bool scgo = true;
+bool showmain = true;
 
 int sreenX = GetSystemMetrics(SM_CXSCREEN);
 int sreenY = GetSystemMetrics(SM_CYSCREEN);
+
+bool crosshair = false;
+
 
 bool esp = false;
 bool bhop = false;
@@ -39,6 +41,11 @@ bool triggerbot = false;
 bool triggerRandomness = false;
 bool triggerCustomDelay = false;
 bool tbDelay = false;
+
+struct vec4
+{
+	float x, y;
+};
 
 struct Vec3
 {
@@ -92,24 +99,31 @@ void HackInt()
 	aimRecoilPunch = (Vec3*)(localplayer + m_aimPunchAngle);
 
 }
-bool init = false;
+
+
 long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 {
 	if (!init)
 	{
+		HackInt();
 		InitImGui(pDevice);
 		init = true;
 	}
+
 	if (GetAsyncKeyState(VK_INSERT) & 1)
 	{
-		scgo = !scgo;
+		showmain = !showmain;
 	}
+	
+
 	ImGui_ImplDX9_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-	if (scgo)
+
+	if (showmain)
 	{
-		ImGui::Begin("scgo");
+		ImGui::Begin("scgo.exe");
+		ImGui::BeginTabBar("esp");
 		ImGui::Text("esp");
 		ImGui::Checkbox("Esp", &esp);
 		ImGui::BeginTabBar("misc");
@@ -138,13 +152,13 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 			}
 		}
 		ImGui::End();
-
-		ImGui::EndFrame();
-		ImGui::Render();
-		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
-
-		return oEndScene(pDevice);
 	}
+
+	ImGui::EndFrame();
+	ImGui::Render();
+	ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+
+	return oEndScene(pDevice);
 }
 
 LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -191,8 +205,6 @@ DWORD WINAPI MainThread(LPVOID lpReserved)
 	} while (!attached);
 	return TRUE;
 }
-
-
 
 DWORD WINAPI RCSThread(LPVOID lp)
 {
@@ -266,6 +278,7 @@ DWORD WINAPI BhopThread(LPVOID lp)
 	}
 }
 
+
 BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 {
 	switch (dwReason)
@@ -273,6 +286,9 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 	case DLL_PROCESS_ATTACH:
 		DisableThreadLibraryCalls(hMod);
 		CreateThread(nullptr, 0, MainThread, hMod, 0, nullptr);
+		CreateThread(nullptr, 0, BhopThread, hMod, 0, nullptr);
+		CreateThread(nullptr, 0, RCSThread, hMod, 0, nullptr);
+		CreateThread(nullptr, 0, TriggerThread, hMod, 0, nullptr);
 		break;
 	case DLL_PROCESS_DETACH:
 		kiero::shutdown();

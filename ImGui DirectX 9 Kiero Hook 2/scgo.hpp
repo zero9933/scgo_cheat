@@ -163,4 +163,3 @@ namespace hazedumper {
 		constexpr ::std::ptrdiff_t set_abs_origin = 0x1E58F0;
 	} // namespace signatures
 } // namespace hazedumper
-

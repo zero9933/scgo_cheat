@@ -29,10 +29,9 @@ bool showmain = true;
 int sreenX = GetSystemMetrics(SM_CXSCREEN);
 int sreenY = GetSystemMetrics(SM_CYSCREEN);
 
-bool crosshair = false;
+bool glow = false;
+ImColor enemyColor;
 
-
-bool esp = false;
 bool bhop = false;
 bool rcs = false;
 int TriggerCustomDelay;
@@ -41,11 +40,6 @@ bool triggerbot = false;
 bool triggerRandomness = false;
 bool triggerCustomDelay = false;
 bool tbDelay = false;
-
-struct vec4
-{
-	float x, y;
-};
 
 struct Vec3
 {
@@ -110,11 +104,10 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 		init = true;
 	}
 
-	if (GetAsyncKeyState(VK_INSERT) & 1)
+	if (GetAsyncKeyState(VK_TAB) & 1)
 	{
 		showmain = !showmain;
 	}
-	
 
 	ImGui_ImplDX9_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -122,13 +115,10 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 
 	if (showmain)
 	{
-		ImGui::Begin("scgo.exe");
-		ImGui::BeginTabBar("esp");
-		ImGui::Text("esp");
-		ImGui::Checkbox("Esp", &esp);
-		ImGui::BeginTabBar("misc");
+		ImGui::Begin("cheat menu");
 		ImGui::Text("misc");
 		ImGui::Checkbox("Bhop", &bhop);
+		ImGui::Checkbox("glow", &glow);
 		ImGui::Checkbox("no recoil", &rcs);
 		if (rcs)
 		{
@@ -137,7 +127,7 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 
 		ImGui::Spacing();
 		ImGui::Separator();
-		ImGui::Text("triggerbot");
+		ImGui::Text("triggerbot setting");
 		ImGui::Checkbox("Enable", &triggerbot);
 		if (triggerbot)
 		{
@@ -151,6 +141,7 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 				ImGui::Checkbox("Random Delay", &triggerRandomness);
 			}
 		}
+
 		ImGui::End();
 	}
 
@@ -277,7 +268,6 @@ DWORD WINAPI BhopThread(LPVOID lp)
 		Sleep(10);
 	}
 }
-
 
 BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 {
