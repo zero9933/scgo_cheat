@@ -2,4 +2,4 @@
 adding more 
 but here,
 join my discord https://discord.gg/K8uUePfPxf
-updated
+GO TO DEBUG FOR THE DLL
